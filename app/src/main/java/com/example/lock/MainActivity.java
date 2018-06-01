@@ -54,13 +54,11 @@ public class MainActivity extends Activity {
                 if(isRecording) return;
                 long nowTime = System.currentTimeMillis();
                 if(nowTime - mLastTime < 1000){
-                    isRecording = true;
                     startRecord();
                     mHandler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             stopRecord();
-                            isRecording = false;
                         }
                     }, 1000*15);
                 }
@@ -74,7 +72,18 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    public void onStop(){
+        Log.d(TAG, "onStop");
+        super.onStop();
+        finish();
+    }
+
+    @Override
     public void onDestroy(){
+        Log.d(TAG, "onDestroy");
+        if(isRecording){
+            stopRecord();
+        }
         BrightnessHelper.setActivityBrightness(-1f, MainActivity.this);
         mHandler.removeCallbacksAndMessages(null);
         super.onDestroy();
@@ -133,6 +142,7 @@ public class MainActivity extends Activity {
     };
 
     private void startRecord(){
+        isRecording = true;
         if (mRecorder == null) {
             mRecorder = new MediaRecorder(); // Create MediaRecorder
         }
@@ -143,7 +153,7 @@ public class MainActivity extends Activity {
             // 这两项需要放在setOutputFormat之前
             mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
             mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-            mRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_720P));
+            mRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_1080P));
             mRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
 
             // Set output file path
@@ -171,5 +181,6 @@ public class MainActivity extends Activity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        isRecording = false;
     }
 }
